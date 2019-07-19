@@ -1,0 +1,1 @@
+samtools index archivo_sorted.bam

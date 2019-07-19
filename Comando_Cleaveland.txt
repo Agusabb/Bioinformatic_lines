@@ -1,0 +1,14 @@
+./CleaveLand4.pl -d /home/bioinfo/Agustin/Degradome/Fasta/AC_Degradome.fasta_dd.txt -u /home/bioinfo/Agustin/miRNATomate/Análisis_Cleaveland_formateado/miRNA_Lista_depurada.fasta -n /home/bioinfo/Agustin/Genoma_de_Tomate/ITAG3.20/ITAG3.2Formateado/ITAG3.2_cDNA_Cleaveland_final.fasta -a -t -o /home/bioinfo/Agustin/T_Plots_miRNAtotalesfaltantes3 > Output_4micro.tab
+
+-e Path al degradoma en fasta
+-d Path al density file del degradoma
+-u Path a los query en fasta
+-n Path al transcriptoma/cDNA
+-a Ordenar alineamientos según Allen score
+-t Output en formato tabular
+-o Path a los T-plots generados. Si no existe será creado
+ 
+
+
+sabbionea@ubuntu:~$ ./CleaveLand4.pl -e /data/sabbionea_projects/DEG_MGAC_Clipped.fasta -u /data/sabbionea_projects/Locus1.fasta -n /data/sabbionea_projects/ITAG3.2_cDNA_Cleaveland_final.fasta -a -t -o /data/sabbionea_projects/Locus1/Tplots_MG/ > ./Locus1/Output_MG
+

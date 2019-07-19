@@ -1,0 +1,4 @@
+awk '!/^>/ { next } { getline seq } length(seq) ==21 { print $0 "\n" seq }' input.fa > fasta.fa
+
+awk 'BEGIN {RS = ">" ; ORS = ""} length($2) >= 1000 {print ">"$0}' file.nowrap.fa > file.1000.fa
+

@@ -1,0 +1,8 @@
+awk 'BEGIN{RS=">";OFS="\t"}NR>1{print $1,$2}' in.fa > out.tab
+
+
+Para hacerlo en bucle:
+
+for i in *.fasta; do
+	awk 'BEGIN{RS=">";OFS="\t"}NR>1{print $1,$2}' $i > $i.tab
+done

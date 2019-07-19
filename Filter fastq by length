@@ -1,0 +1,1 @@
+awk 'BEGIN {OFS = "\n"} {header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) == 21) {print header, seq, qheader, qseq}}' < your.fastq > filtered.fastq

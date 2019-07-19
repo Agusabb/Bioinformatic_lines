@@ -1,0 +1,36 @@
+Solo conservar filas con el valor 21M en la columna 4 - Ordenar la columna 3 (posicion) y eliminar duplicados en base a la misma - Ordenar en base a la columna 1 (hebra sense o antisense) - Exportar solo las filas con el valor 16 en la columna 1
+
+
+awk '$4 == "21M"' Phas2.txt|sort -u -k 3,3|sort -k 1|awk '$1 == 16' > phas4.txt
+
+
+Todo junto:
+        
+samtools view BreakerFull.bam SL3.0ch00_14433784-14434274|cut -f 2,3,4,6,10,14|awk '$4 == "21M"'|sort -k 1|awk '$1 == 0'|awk 'b!=$3{for(j=0;j<i;j++){print a[j],i};delete a;b=$3;i=0;}{a[i++]=$0}END{for (j=0;j<i;j++){print a[j],i}}'|sort -k 3 -n -u > ultimaprueba.txt         
+
+
+
+awk 'FNR==NR{h[$3]++;next} {print $0. h[$3]}' Prueba.tab Prueba.tab > 2.tab 
+
+
+
+ESTE FUNCIONA!!!!!!!!!!
+
+Samtools view: para adquirir la info del archivo BAM.
+cut -f 2,3,4,6,10,14: para extraer las columnas que interesan.
+awk '$4 == "21M"': para filtrar las reads de 21 nucleótidos.
+sort -k 1: para ordenar hebra sense primero y antisense después.
+awk '$1 == 0': este se cambia entre 0 y 16. El 0 es para filtrar la hebra sense, y el 16 para la antisense.
+awk 'BEGIN{FS=OFS="\t"} b!=$3{for(j=0;j<i;j++){print a[j],i};delete a;b=$3;i=0;}{a[i++]=$0}END{for (j=0;j<i;j++){print a[j],i}}': cuenta la cantidad de ocurrencias de los valores de la columna 3 (posición), equivalente al "countif" de Excel.
+sort -k 6,6: ordena por la columna de mismatches.
+sort -k 3 -n -u: después de ordenar por los mismatches, ordena por posición y además elimina los duplicados.
+
+Esta parte se puede sacar si quiero conservar todas las reads:
+awk '$7 >= 5 { print }': sólo se reportan las filas que en la columna 7 (reads) el valor sea mayor o igual a 5
+
+
+samtools view RedRipeACfull.bam SL3.0ch01:4336179-4337135|cut -f 2,3,4,6,10,14|awk '$4 == "21M"'|sort -k 1|awk '$1 == 0'|awk 'BEGIN{FS=OFS="\t"} b!=$3{for(j=0;j<i;j++){print a[j],i};delete a;b=$3;i=0;}{a[i++]=$0}END{for (j=0;j<i;j++){print a[j],i}}'|sort -k 6,6|sort -k 3 -n -u > output.tab
+
+
+O CON FILTRO DE READS:
+samtools view RedRipeACfull.bam SL3.0ch01:4336179-4337135|cut -f 2,3,4,6,10,14|awk '$4 == "21M"'|sort -k 1|awk '$1 == 0'|awk 'BEGIN{FS=OFS="\t"} b!=$3{for(j=0;j<i;j++){print a[j],i};delete a;b=$3;i=0;}{a[i++]=$0}END{for (j=0;j<i;j++){print a[j],i}}'|sort -k 6,6|sort -k 3 -n -u|awk '$7 >= 5 { print }' > output.tab

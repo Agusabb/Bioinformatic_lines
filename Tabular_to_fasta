@@ -1,0 +1,15 @@
+awk '{print ">"$1"\n"$2}' tabseq.tab > seq.fasta
+$1 es la primera columna
+$2 es la segunda
+Se pueden invertir 
+
+
+Cuidado con no dejar un "/n" al final del tabular, si no se va a generar un ">" al final del archivo
+
+
+
+Para hacerlo en bucle:
+
+for i in *.tab; do
+    awk '{print ">"$1"\n"$2}' $i > $i.fasta
+done

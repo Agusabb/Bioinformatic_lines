@@ -1,0 +1,6 @@
+#yourfile.fastq  
+echo $(cat yourfile.fastq|wc -l)/4|bc
+
+#yourfile.fastq.gz
+ echo $(zcat yourfile.fastq.gz|wc -l)/4|bc
+

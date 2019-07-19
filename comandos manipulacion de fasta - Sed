@@ -1,0 +1,9 @@
+Manipulacion de fasta
+
+
+
+Cambio de - por _x 
+
+
+sed 's/-/_x/g' BreakerMT_clean21Collapsed.fasta > BreakerMT_clean21Prueba.fasta
+

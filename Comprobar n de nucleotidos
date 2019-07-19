@@ -1,0 +1,11 @@
+Para Fastq:
+
+awk '{if(NR%4==2) print length($1)}' input.fastq| sort -n | uniq -c
+
+
+
+
+Para Fasta:
+
+awk '{if(NR%2==0) print length($1)}' File.fasta| sort -n | uniq -c
+

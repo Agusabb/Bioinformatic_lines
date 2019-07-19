@@ -1,0 +1,19 @@
+Es importante que todos los archivos tengan la misma extension en su nombre.
+Hay que ejecutarlo en la carpeta donde queremos trabajar.
+
+for i in *.tab; do
+    awk '{print ">"$1"\n"$2}' $i > $i.fasta
+done
+
+i = cualquier archivo en la carpeta
+*.extension = para que ejecute el loop a todos los archivos de la carpeta
+$i en el input del awk le indica que secuencialmente haga esto para todos los archivos "i" de la carpeta
+$i.fasta en el output va a agregar ".fasta" a todos los archivos que se generen
+
+Puedo redirigir los outputs utilizando rutas antes de $i.fasta:
+
+for i in *.tab; do
+    awk '{print ">"$1"\n"$2}' $i > ./output/$i.fasta 
+done
+
+En este caso los va a mandar a una carpeta llamada Output que se encuentre dentro de la carpeta de trabajo.
