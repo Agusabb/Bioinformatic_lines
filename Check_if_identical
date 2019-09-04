@@ -1,0 +1,3 @@
+Comando para comparar si dos archivos son iguales
+
+cmp --silent 2prueba.tab MidR1_counts.tab && echo '### SUCCESS: Files Are Identical! ###' || echo '### WARNING: Files Are Different! ###'
