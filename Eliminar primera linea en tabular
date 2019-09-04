@@ -1,0 +1,5 @@
+Este comando sirve para eliminar la primera linea/fila/row de un archivo tabular. Se puede cambiar el numero para indicar a partir
+de que fila quiero arrancar.
+
+tail -n +2 prueba.tab > 2prueba.tab
+
