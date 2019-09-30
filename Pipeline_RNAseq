@@ -13,6 +13,10 @@ Mapeo
 
 bioinfo@bioinfo-pc[bioinfo] hisat2 --no-unal -x /home/bioinfo/Agustin/Genoma_Naranjo/Csinensis/v1.1/Index_Hisat2/Csi -S /media/bioinfo/ToshibaExt/Naranjo_Fastq/Raiz_Xuegan/Output_Mapeo/RaizCK1.sam -1 /media/bioinfo/ToshibaExt/Naranjo_Fastq/Raiz_Xuegan/Clean/RaizCK1_Clean_Paired_1.fastq -2 /media/bioinfo/ToshibaExt/Naranjo_Fastq/Raiz_Xuegan/Clean/RaizCK1_Clean_Paired_2.fastq 2> /media/bioinfo/ToshibaExt/Naranjo_Fastq/Raiz_Xuegan/Output_Mapeo/Rep_Hisat_RaizCK1_Clean.txt
 
+Si vamos a mapear libraries single-ended, en vez de -1 y -2, se usa -U
+Si vamos a mapear un archivo fasta, se usa -f en vez de las anteriores
+
+
 Htseq-counts
 
 htseq-count -f bam -s no -t exon -i transcript_id -m union /media/bioinfo/ToshibaExt/Naranjo_Fastq/Hoja_Xuegan/Output_Mapeo/Hoja_Xck1.bam /home/bioinfo/Agustin/Genoma_Naranjo/Csinensis/v1.1/annotation/exons.gff3 > Hoja_Xck1.counts
