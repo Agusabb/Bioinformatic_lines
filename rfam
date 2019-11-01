@@ -1,0 +1,28 @@
+Primero hay que descargar desde el ftp de rfam la version actual (current)
+
+manager@bl8vbox[fasta_files] wget -r ftp://ftp.ebi.ac.uk/pub/databases/Rfam/CURRENT/fasta_files/   (puede variar el enlace)
+
+Luego hay que descomprimir todos los archivos
+
+manager@bl8vbox[fasta_files] gunzip *.gz
+
+Se concatenan:
+
+manager@bl8vbox[fasta_files] cat *.fa > rfam.fasta
+
+Opcional - borrar todos los fasta individuales
+
+manager@bl8vbox[fasta_files] rm -f *.fa  (-f es para que no me pida confirmacion en todos los casos)
+
+Me quedo con la especie de interes y sus secuencias:
+
+manager@bl8vbox[fasta_files] grep "Kluyveromyces marxianus" -A1 rfam_Km.fa > rfam_Kmarx.fa
+
+Elimino el doble guion que tiene el archivo
+
+manager@bl8vbox[fasta_files] sed 's/--//g' rfam_Kmarx.fa > rfam_Kmarx2.fa
+
+Elimino los espacios en blanco del archivo final:
+
+manager@bl8vbox[fasta_files] sed '/^\s*$/d' rfam_Kmarx2.fa > rfam_Kmarx3.fa
+
