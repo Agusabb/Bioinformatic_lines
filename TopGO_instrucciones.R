@@ -55,15 +55,54 @@ showSigOfNodes(myGOdata, score(resultFisher), firstSigNodes = 5, useInfo ='all')
 ##y los menos significativos, amarillos
 printGraph(myGOdata, resultFisher, firstSigNodes = 5, fn.prefix = "tGO", useInfo = "all", pdfSW = TRUE)
 
+
+
 ##Si por ejemplo quiero ver que genes tienen un GO especifico puedo hacer algo asi:
-myterms = c("GO:0006807", "GO:0009056", "GO:1901564")
-mygenes <- genesInTerm(myGOdata, myterms)
-for (i in 1:length(myterms))
-{
-    myterm <- myterms[i]
-    mygenesforterm <- mygenes[myterm][[1]]
-    mygenesforterm <- paste(mygenesforterm, collapse=',')
-    print(paste("Term",myterm,"genes:",mygenesforterm))
-}
+
+##myterms = c("GO:0006807", "GO:0009056", "GO:1901564")
+##mygenes <- genesInTerm(myGOdata, myterms)
+##for (i in 1:length(myterms))
+##{
+##    myterm <- myterms[i]
+##    mygenesforterm <- mygenes[myterm][[1]]
+##    mygenesforterm <- paste(mygenesforterm, collapse=',')
+##    print(paste("Term",myterm,"genes:",mygenesforterm))
+##}
 
 
+
+
+
+##PLOT que adapte de una pregunta del foro biostars, donde enrichment score es el -log base 10 del p-value del enrichment
+
+
+goEnrichment <- GenTable(myGOdata, KS=resultFisher, orderBy="KS", topNodes=20)
+goEnrichment <- goEnrichment[goEnrichment$KS<0.05,]
+goEnrichment <- goEnrichment[,c("GO.ID","Term","KS")]
+goEnrichment$Term <- gsub(" [a-z]*\\.\\.\\.$", "", goEnrichment$Term)
+goEnrichment$Term <- gsub("\\.\\.\\.$", "", goEnrichment$Term)
+goEnrichment$Term <- paste(goEnrichment$GO.ID, goEnrichment$Term, sep=", ")
+goEnrichment$Term <- factor(goEnrichment$Term, levels=rev(goEnrichment$Term))
+goEnrichment$KS <- as.numeric(goEnrichment$KS)
+
+require(ggplot2)
+ggplot(goEnrichment, aes(x=Term, y=-log10(KS))) +
+     stat_summary(geom = "bar", fun.y = mean, position = "dodge") +
+     xlab("Biological process") +
+     ylab("Enrichment") +
+     ggtitle("Title") +
+     scale_y_continuous(breaks = round(seq(0, max(-log10(goEnrichment$KS)), by = 2), 1)) +
+     theme_bw(base_size=18) +
+     theme(
+         legend.position='none',
+         legend.background=element_rect(),
+         plot.title=element_text(angle=0, size=16, face="bold", vjust=1),
+         axis.text.x=element_text(angle=0, size=10, face="bold", hjust=1.10),
+         axis.text.y=element_text(angle=0, size=10, face="bold", vjust=0.5),
+         axis.title=element_text(size=16, face="bold"),
+         legend.key=element_blank(),     #removes the border
+         legend.key.size=unit(1, "cm"),      #Sets overall area/size of the legend
+         legend.text=element_text(size=10),  #Text size
+         title=element_text(size=16)) +
+     guides(colour=guide_legend(override.aes=list(size=2.5))) +
+     coord_flip()
