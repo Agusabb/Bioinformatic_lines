@@ -1,5 +1,9 @@
 RaizCK1
 
+Indice de rfam
+
+manager@bl8vbox[manager] bowtie-build input.fa nombre_base 
+
 Limpieza 
 
 bioinfo@bioinfo-pc[bioinfo] bowtie -v 2 /home/bioinfo/Agustin/Genoma_Naranjo/RFam_Index/RFamNaranja -1 /media/bioinfo/ToshibaExt/Naranjo_Fastq/Raiz_Xuegan/RaizCK1_1.fastq -2 /media/bioinfo/ToshibaExt/Naranjo_Fastq/Raiz_Xuegan/RaizCK1_2.fastq --un /media/bioinfo/ToshibaExt/Naranjo_Fastq/Raiz_Xuegan/Clean/RaizCK1_Clean_Paired.fastq --al /media/bioinfo/ToshibaExt/Naranjo_Fastq/Raiz_Xuegan/Output_Rfam/RaizCK1_Ribosomales_Paired.fastq
