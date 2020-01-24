@@ -1,8 +1,8 @@
-RaizCK1
+library ejemplo: RaizCK1
 
-Indice de rfam
+Indice de rfam (ver archivo rfam dentro de esta carpeta)
 
-manager@bl8vbox[manager] bowtie-build input.fa nombre_base 
+manager@bl8vbox[manager] bowtie-build input.fa nombre_base (nombre base es el nombre que va a tener el índice) 
 
 Limpieza 
 
@@ -25,8 +25,9 @@ Htseq-counts
 
 htseq-count -f bam -s no -t exon -i transcript_id -m union /media/bioinfo/ToshibaExt/Naranjo_Fastq/Hoja_Xuegan/Output_Mapeo/Hoja_Xck1.bam /home/bioinfo/Agustin/Genoma_Naranjo/Csinensis/v1.1/annotation/exons.gff3 > Hoja_Xck1.counts
 
-Alternativa - Featurecounts
+Alternativa - Featurecounts (Me gusta más, es mucho mas rápido)
 
+#Ojo con -t y -g, puede variar según el archivo a analizar, yo lo hago por prueba y error
 featureCounts -p -t gene -g ID -a /home/bioinfo/Agustin/Genoma_Naranjo/Csinensis/v1.1/annotation/Csinensis_154_v1.1.gene.gff3 -o /media/bioinfo/ToshibaExt/Naranjo_Fastq/Abscission/Output_Mapeo/Archivos_Bam/Counts_Clean/Rh2_R2_Featurecounts.tab /media/bioinfo/ToshibaExt/Naranjo_Fastq/Abscission/Output_Mapeo/Archivos_Bam/Rh2_R2_name.bam
 
 
