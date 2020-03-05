@@ -1,0 +1,35 @@
+library(ggplot2)
+library(gplots)
+setwd("/media/bioinfo/ToshibaExt/Naranjo_Fastq/HTSeq_Gene/DESeq2/Heatmap")
+dge <- read.csv("Completo_Familias.tab", sep="\t")
+row.names(dge) <- dge$X
+dge <- subset( dge, select = -1 )
+dge_matrix <- data.matrix(dge)
+my_palette <- colorRampPalette(c("pink", "red"))(n = 25)
+heatmap.2(as.matrix(dge_matrix), col=my_palette, breaks = seq(0, n, length.out = 26), density.info="none", cexRow=1,cexCol=1, margins=c(4,10), trace="none", dendrogram='none', symm=F,symkey=T,symbreaks=T, scale="none", Rowv=FALSE, Colv = FALSE)
+
+density.info = etiqueta en la referencia de color
+margins = márgenes del gráfico
+trace = traza unas lineas en las filas, columnas o ambas (none no traza nada)
+dendrogram = agrega o quita el dendrograma
+symm = para la simetria del eje X, solo debe ser true si la matriz es cuadrada
+scale = tiene que ser none para que respete el valor de las counts de la matriz
+breaks = son las divisiones que crea en la leyenda
+length.out = siempre tiene que ser mayor por 1 al n seteado en cantidad de colores
+symbreaks = hace los cortes simetricos al cero si la matriz tiene valores negativos
+symkey = indica si la leyenda de color es o no simetrica al cero
+Rowv = indica el orden de las filas. Por defecto TRUE, pero si quiero que mantenga el orden de la matriz, debe ser FALSE
+Colv = indica el orden de las columnas. Por defecto TRUE, pero si quiero que mantenga el orden de la matriz, debe ser FALSE
+
+FUNDAMENTAL: CORREGIR MANUALMENTE EL RANGO DE BREAKS, SEGUN EL VALOR MAS GRANDE DE COUNTS EN LA MATRIZ.
+
+> my_palette <- colorRampPalette(c("pink", "red"))(n = 25)
+> heatmap.2(as.matrix(dge_matrix), col=my_palette, 
++           breaks = seq(0, 1500, length.out = 26), density.info="none", cexRow=1,cexCol=1, margins=c(4,10), trace="none", dendrogram='none', symm=F,symkey=T,symbreaks=T, scale="none")
+
+
+
+heatmap.2(as.matrix(dge_matrix), col=my_palette, 
+         breaks = seq(-3, 3, length.out = 101), density.info="none", trace="none", 
+         dendrogram='none', symm=F,symkey=T,symbreaks=T, scale="none")
+> 
