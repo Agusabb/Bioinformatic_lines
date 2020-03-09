@@ -1,0 +1,14 @@
+Busco todas las entradas de naranja (csi)
+grep -A1 "csi" mature.fa > Csi_miRNA.fa 
+
+Elimino el doble guion que se genera
+sed 's/--//g' Csi_miRNA.fa > 2Csi_miRNA.fa
+
+Elimino el espacio vacio que aparece al eliminar el doble guion
+sed '/^\s*$/d' 2Csi_miRNA.fa > Csi_miRNA.fa
+
+Borro todo lo que aparece despues del primer espacio en todas las lineas (corrige los nombres)
+sed 's/\s.*$//' Csi_miRNA.fa > 2Csi_miRNA.fa
+
+Cambio las U por T
+sed 's/U/T/g' 2Csi_miRNA.fa > Csi_miRNA.fa
