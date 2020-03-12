@@ -17,10 +17,13 @@ Pipeline de trabajo bioinformático
 -i: archivo Input
 -o: archivo Output
 
-Para encontrar los adaptadores se optó por hacerlo de forma manual, es decir, se analizó invidualmente el contenido de cada una de las libraries mediante el comando "less", y se identificaron los adaptadores.
+Para encontrar los adaptadores se optó por hacerlo de forma manual, es decir, se analizó invidualmente el contenido de cada 
+una de las libraries mediante el comando "less", y se identificaron los adaptadores.
 
 
-3) A cada una de las libraries se les hizo un análisis de calidad de secuenciación con el objetivo de evaluar la necesidad de realizar un posterior filtrado de Reads por calidad. Para esto, se utilizó el programa FastQC. El criterio seguido fue que el q score no sea menor a 28 para el 85/90% de las Reads.
+3) A cada una de las libraries se les hizo un análisis de calidad de secuenciación con el objetivo de evaluar la necesidad de
+realizar un posterior filtrado de Reads por calidad. Para esto, se utilizó el programa FastQC. El criterio seguido fue que el 
+q score no sea menor a 28 para el 85/90% de las Reads.
 
 
 4) Filtrado por calidad con la opción Fastq_quality_filter del programa FastX_Toolkit. 
@@ -34,7 +37,11 @@ Para encontrar los adaptadores se optó por hacerlo de forma manual, es decir, s
 -o: Output
 
 
-5) El paso siguiente fue quitar de cada library los RNA no codificantes que no sean smallRNAs. Para ello se buscaron en el sitio web http://rfam.xfam.org/ todas las secuencias que pudiesen ser eliminadas (RNA ribosomales, de transferencia, entre otros). Fueron descargadas, se las colapsó, se les realizaron pequeñas correcciones al formato (eliminación de renglones vacíos, por ejemplo) y se conservaron sólo las secuencias pertenecientes a Solanum lycopersicum. Posteriormente se eliminaron las que estuviesen repetidas empleando un workflow en el sitio web UseGalaxy. Se lo detalla a continuación:
+5) El paso siguiente fue quitar de cada library los RNA no codificantes que no sean smallRNAs. Para ello se buscaron en el 
+sitio web http://rfam.xfam.org/ todas las secuencias que pudiesen ser eliminadas (RNA ribosomales, de transferencia, entre
+otros). Fueron descargadas, se las colapsó, se les realizaron pequeñas correcciones al formato (eliminación de renglones 
+vacíos, por ejemplo) y se conservaron sólo las secuencias pertenecientes a Solanum lycopersicum. Posteriormente se eliminaron
+las que estuviesen repetidas empleando un workflow en el sitio web UseGalaxy. Se lo detalla a continuación:
 	a) Fasta_to_Tabular
 	b) Sort (on column 2)
 	c) Unique
@@ -46,20 +53,25 @@ El comando d) vuelve al formato Fasta.
 Finalmente, se agrupó a todas las secuencias resultantes en un sólo archivo Fasta.
 
 
-6) Para eliminar estas secuencias no codificantes de cada library se empleó el programa Bowtie. El primer paso fue generar un índice a partir del archivo Fasta obtenido en el paso anterior. Para ello se utilizó el comando "Bowtie-build":
+6) Para eliminar estas secuencias no codificantes de cada library se empleó el programa Bowtie. El primer paso fue generar un
+índice a partir del archivo Fasta obtenido en el paso anterior. Para ello se utilizó el comando "Bowtie-build":
 
 	bowtie-build Input Output
 
-Una vez creado el índice se procedió a alinear cada una de las libraries con el objetivo de conservar todas las reads que no hayan sido alineadas a este conjunto de secuencias no codificantes.
+Una vez creado el índice se procedió a alinear cada una de las libraries con el objetivo de conservar todas las reads que no
+hayan sido alineadas a este conjunto de secuencias no codificantes.
 
-	bowtie -v 2 --un archivo_output(con las reads que ALINEARON A LOS RNA NO CODIFICANTES) Dirección_al_Índice Archivo_input Archivo_output(con las reads que NO ALINEARON)
+	bowtie -v 2 --un archivo_output(con las reads que ALINEARON A LOS RNA NO CODIFICANTES) Dirección_al_Índice Archivo_input
+	Archivo_output(con las reads que NO ALINEARON)
 La opción "-v 2" indica el tipo de alineamiento y los mismatches permitidos.
 La opción "--un" permite que se genere un archivo con todas las reads que no mapearon al genoma de referencia.
 
-Se conservaron los archivos cuyas reads no mapearon al archivo fasta de RNAs no codificantes. A estos archivos se los llamó "Clean" (limpios).
+Se conservaron los archivos cuyas reads no mapearon al archivo fasta de RNAs no codificantes. A estos archivos se los llamó
+"Clean" (limpios).
 
 
-7) Para proseguir con los alineamientos, se realizó un índice al genoma de tomate (versión 3.00) utilizando el comando Bowtie-build. Contra este índice se mapearon todas las libraries limpias. 
+7) Para proseguir con los alineamientos, se realizó un índice al genoma de tomate (versión 3.00) utilizando el comando 
+Bowtie-build. Contra este índice se mapearon todas las libraries limpias. 
 
 	bowtie -v 2 -m 50 -k 50 -S --al Archivo_Output.fastq Dirección_al_Índice Archivo_Input.fastq Archivo_Output.Sam
 
@@ -79,40 +91,54 @@ Se conservaron los archivos cuyas reads no mapearon al archivo fasta de RNAs no 
 -o: output
 
 
-9) Lo próximo fue alinear los matches positivos al genoma de tomate contra una lista de miRNA conocidos de tomate, para saber cuáles de estos microRNA se expresaban en cada estadío y cuántas Reads había de cada uno. Para lograr esto, se siguió una serie de pasos:
-	a) Primero se descargó del sitio Mirbase la última base de datos disponible de microRNA de tomate. Esta lista fue actualizada en base 		a lo encontrado en bibliografía. 
+9) Lo próximo fue alinear los matches positivos al genoma de tomate contra una lista de miRNA conocidos de tomate, para saber
+cuáles de estos microRNA se expresaban en cada estadío y cuántas Reads había de cada uno. Para lograr esto, se siguió una 
+serie de pasos:
+	a) Primero se descargó del sitio Mirbase la última base de datos disponible de microRNA de tomate. Esta lista fue
+	actualizada en base 		a lo encontrado en bibliografía. 
 	b) Se generó un "genoma de microRNAs de tomate" en formato fasta y se utilizó bowtie para generar un índice del mismo. 
 	c) Se realizó el mapeo de las libraries colapsadas contra este "genoma" de microRNAs, sin permitir mismatches.
 
 	bowtie -v 0 -m 1 -S --al Output.fasta Índice -f input.fasta Output.sam 
 
 	-v 0: indica el tipo de alineamiento y los mismatches permitidos
-	-m 1: hace que bowtie se abstenga de reportar cualquier alineamiento para Reads que tengan mas de N alineamientos reportables
+	-m 1: hace que bowtie se abstenga de reportar cualquier alineamiento para Reads que tengan mas de N alineamientos
+	reportables
 	-S: indica a bowtie que genere un archivo SAM como output
 	--al: permite que se genere un archivo con todas las reads que mapearon al genoma de referencia
 	-f: indica a bowtie que el archivo input está en formato fasta.
 
 
-10) Una vez que se tuvieron los archivos Sam con el resultado de los mapeos contra la lista de miRNAs, se procedió a filtrar los mismos. El objetivo fue conservar sólo aquellos miRNA que presentaron matchs perfectos. Los pasos seguidos fueron:
+10) Una vez que se tuvieron los archivos Sam con el resultado de los mapeos contra la lista de miRNAs, se procedió a filtrar
+los mismos. El objetivo fue conservar sólo aquellos miRNA que presentaron matchs perfectos. Los pasos seguidos fueron:
 
 	a) Usando la herramienta Samtools, se eliminaron de cada archivo SAM aquellos miRNA que no presentaron matches:
 		samtools view -F 4 Input.sam > Output.sam
 	-F 4: indica a samtools que elimine todas las filas cuyo campo "Flag" sea 4, que corresponde a "no match".
-	b) Luego se utilizó LibreOffice Calc para filtrar manualmente cada archivo. Se eliminaron las filas con un número 16 en la columna 2, 		lo que corresponde a un match en la hebra reversa. También se eliminaron aquellas filas cuya columna 4 (posición de inicio de mapeo) 		no haya tenido el valor 1.
+	b) Luego se utilizó LibreOffice Calc para filtrar manualmente cada archivo. Se eliminaron las filas con un número 16 
+	en la columna 2, 		lo que corresponde a un match en la hebra reversa. También se eliminaron aquellas 
+	filas cuya columna 4 (posición de inicio de mapeo) 		no haya tenido el valor 1.
 
 
-11) Para obtener el número de Reads mapeadas de cada miRNA, se utilizó la opción "text to columns" de calc en la primera columna. El primer número corresponde a la posición y el segundo al número de reads (generados por el comando collapse). Se conservó sólo el número de reads.
+11) Para obtener el número de Reads mapeadas de cada miRNA, se utilizó la opción "text to columns" de calc en la primera
+columna. El primer número corresponde a la posición y el segundo al número de reads (generados por el comando collapse). 
+Se conservó sólo el número de reads.
 
 
-12) Con estos datos, se armó una nueva planilla en Calc con el total de reads correspondientes a cada microRNA para cada estadío de maduración.
+12) Con estos datos, se armó una nueva planilla en Calc con el total de reads correspondientes a cada microRNA para cada 
+estadío de maduración.
 
 
-13) A partir de estos datos, se generaron archivos tabulares comparando de a pares los diferentes estadíos, con el objetivo de realizar un análisis de expresión diferencial con el paquete EdgeR en R. Dichos archivos fueron armados en una planilla de calc y luego copiados en un editor de texto, para asegurarse de esa forma que la tabulación fue correcta. Estas Readcounts están constituídas de la siguiente manera:
+13) A partir de estos datos, se generaron archivos tabulares comparando de a pares los diferentes estadíos, con el objetivo 
+de realizar un análisis de expresión diferencial con el paquete EdgeR en R. Dichos archivos fueron armados en una planilla 
+de calc y luego copiados en un editor de texto, para asegurarse de esa forma que la tabulación fue correcta. Estas Readcounts
+están constituídas de la siguiente manera:
 	# en las filas, los nombres de los miRNAs
 	# en las columnas, el estadío de maduración y las correspondientes Reads sin normalizar.
 
  
-14) Para realizar el análisis de expresión diferencial con EdgeR en R, se utilizaron las siguientes líneas de comando (variando en cada caso input, output y tamaño de libraries):
+14) Para realizar el análisis de expresión diferencial con EdgeR en R, se utilizaron las siguientes líneas de comando 
+(variando en cada caso input, output y tamaño de libraries):
 
 	#Creación de la variable data que contiene al Archivo input
 	data <- as.matrix(read.table("input"))
@@ -121,7 +147,8 @@ Se conservaron los archivos cuyas reads no mapearon al archivo fasta de RNAs no 
 	g <- c(0,1)
 	#En caso de que haya réplicas: g <- c(0, 0, 1, 1)
 
-	#Creación de la lista necesaria para el análisis con todos sus componentes, donde "número1" y "número2" corresponden al tamaño de las 		libraries a analizar
+	#Creación de la lista necesaria para el análisis con todos sus componentes, donde "número1" y "número2" 
+	corresponden al tamaño de las libraries a analizar
 	d <- DGEList(counts=data,group=g,lib.size=c(número1,número2))
 
 	#Normalización
@@ -131,7 +158,10 @@ Se conservaron los archivos cuyas reads no mapearon al archivo fasta de RNAs no 
 	d <- estimateCommonDisp(d)
 	d <- estimateTagwiseDisp(d)
 
-	#Luego de la evaluación de libraries con réplicas, se encontraron algunos microRNAs cuya expresión se mantenía relativamente constante 		a lo largo de la maduración y la diferencia entre las réplicas era muy poca. Por lo tanto, pudieron utilizarse como referencia para 		calcular la dispersión en las otras libraries sin réplicas. Esto se logra utilizando las siguientes líneas:
+	#Luego de la evaluación de libraries con réplicas, se encontraron algunos microRNAs cuya expresión se mantenía
+	relativamente constante 		a lo largo de la maduración y la diferencia entre las réplicas era muy poca. 
+	Por lo tanto, pudieron utilizarse como referencia para 		calcular la dispersión en las otras libraries sin 
+	réplicas. Esto se logra utilizando las siguientes líneas:
 		housekeeping=c("microRNA1","microRNA2")
 		d1 <- d
 		d1$samples$group <- 1
@@ -157,10 +187,13 @@ Se conservaron los archivos cuyas reads no mapearon al archivo fasta de RNAs no 
 
 
 	
-15) Una vez listos los análisis de cada comparación, se seleccionaron todos los miRNA que tuvieron q-value (FDR) menor a 0,05 en al menos uno de los pares evaluados. Paralelamente, se promediaron los valores de la normalización correspondiente a cada microRNA y cada estadío para obtener un valor único por estadío.
+15) Una vez listos los análisis de cada comparación, se seleccionaron todos los miRNA que tuvieron q-value (FDR) menor a 0,05 
+en al menos uno de los pares evaluados. Paralelamente, se promediaron los valores de la normalización correspondiente a cada
+microRNA y cada estadío para obtener un valor único por estadío.
 
 
-16) Se graficaron todos los microRNAs seleccionados en el punto anterior: los estadíos de maduración se dispusieron en el eje X y las Reads normalizadas en el eje Y.
+16) Se graficaron todos los microRNAs seleccionados en el punto anterior: los estadíos de maduración se dispusieron en el 
+eje X y las Reads normalizadas en el eje Y.
 
 
 
@@ -172,8 +205,10 @@ Para analizar y caracterizar RNAs pequeños de los diferentes estadíos, se usó
 
 bioinfo@bioinfo-pc[Shortstack_Output] ShortStack --readfile input.fastq --genomefile Ruta_al_genoma/S_lycopersicum_chromosomes.3.00.fa --outdir carpeta_output --ranmax none --mismatches 2 --nohp
 
--La opción ranmax configurada como "none" impide que shortstack elimine alineamientos por considerarlos aleatorios o multi-mappeds.
--Se permitieron 2 mismatches, dado que las libraries son del cultivar Ailsa Craig y el genoma de referencia, del cultivar Heinz 1706.
+-La opción ranmax configurada como "none" impide que shortstack elimine alineamientos por considerarlos aleatorios o 
+multi-mappeds.
+-Se permitieron 2 mismatches, dado que las libraries son del cultivar Ailsa Craig y el genoma de referencia, del cultivar 
+Heinz 1706.
 -nohp desactiva la búsqueda de microRNAs
 
 2) Los archivos output generados fueron filtrados empleando los siguientes criterios:
@@ -181,39 +216,76 @@ bioinfo@bioinfo-pc[Shortstack_Output] ShortStack --readfile input.fastq --genome
 	b) Número de reads: mayor a 5
 	c) P-score: mayor a 30
 
-3) Se analizan los loci generados y se observa si no hay loci que se solapen entre sí o un locus que contenga a otro u otros. De ser así, se modifican las coordenadas para incluir en un sólo locus los cercanos o los contenidos. El objetivo de este paso es disminuir la cantidad de loci que van a ser analizados en los pasos posteriores.
+3) Se analizan los loci generados y se observa si no hay loci que se solapen entre sí o un locus que contenga a otro u otros. 
+De ser así, se modifican las coordenadas para incluir en un sólo locus los cercanos o los contenidos. El objetivo de este 
+paso es disminuir la cantidad de loci que van a ser analizados en los pasos posteriores.
 
-4) Empleando Samtools index con opciones por default, se crea un índice para cada archivo .bam generado por shortstack. Esto es necesario para el paso posterior.
+4) Empleando Samtools index con opciones por default, se crea un índice para cada archivo .bam generado por shortstack. 
+Esto es necesario para el paso posterior.
 
 	samtools index input.bam
 
 5) Se extraen las reads de cada locus que haya pasado los filtros anteriores con el siguiente protocolo:
 	a) Primero se extrae la secuencia del locus:
 	samtools view archivo.bam SL3.0chXX:inicio - fin > Phas1.txt
-	b) Luego se extraen la columna 2 (para saber si la read mapeó en la hebra sentido o antisentido), 3 (para conservar el cromosoma del que proviene), 4 (proporciona la coordenada de inicio de la read), 6 (cantidad de nucleotidos), 10 (Secuencia) y 14 (numero de mismatches).
+	b) Luego se extraen la columna 2 (para saber si la read mapeó en la hebra sentido o antisentido), 3 (para conservar 
+	el cromosoma del que proviene), 4 (proporciona la coordenada de inicio de la read), 6 (cantidad de nucleotidos), 
+	10 (Secuencia) y 14 (numero de mismatches).
 	cut -f 2,3,4,6,10,14 Phas1.txt > Phas2.txt
 
 	O todo en una misma línea:
 
 	samtools view archivo.bam SL3.0chXX:inicio - fin|cut -f 2,3,4,6,10,14 > Phas3.txt
 
-6) Posteriormente, se trabaja sobre el arhivo Phas2.txt generado en el paso anterior. Primero se filtran las reads en base a su tamaño, conservando sólo las de 21 nucleótidos. Luego se separan por la hebra a la cual mappearon. Empleando una fórmula de excel o calc [=countif(c:c,$C1) suponiendo que en la columna C se encuentre la posición de inicio de la read], se calcula cuántas veces aparece cada read (es decir, su abundancia) y se eliminan las reads duplicadas en base a su posición de inicio de mapeo. Es conveniente primero ordenarlas por número de mismatches, de esta forma, en caso de que la posición de inicio de mapeo sea la misma, se va a conservar la secuencia sin mismatches. El valor de la abundancia de reads debe ser conservado, por lo que hay que pegarlo a otra columna como "valor" y no como fórmula.
+6) Posteriormente, se trabaja sobre el arhivo Phas2.txt generado en el paso anterior. Primero se filtran las reads en base a 
+su tamaño, conservando sólo las de 21 nucleótidos. Luego se separan por la hebra a la cual mappearon. Empleando una fórmula 
+de excel o calc [=countif(c:c,$C1) suponiendo que en la columna C se encuentre la posición de inicio de la read], se calcula
+cuántas veces aparece cada read (es decir, su abundancia) y se eliminan las reads duplicadas en base a su posición de inicio de
+mapeo. Es conveniente primero ordenarlas por número de mismatches, de esta forma, en caso de que la posición de inicio de mapeo
+sea la misma, se va a conservar la secuencia sin mismatches. El valor de la abundancia de reads debe ser conservado, por lo que
+hay que pegarlo a otra columna como "valor" y no como fórmula.
 
-7) Una vez que se tienen filtradas las secuencias, posición de inicio de mapeo, hebra a la que mapearon y abundancia de reads, se procede a hacer el análisis de fase. Para esto se diseñó una plantilla de Excel que explico a continuación:
-	a) Tiene 3 pestañas: Hebra sentido, Hebra anti-sentido y P-Ratio. Las 2 primeras van a tener el análisis correspondiente a cada hebra, mientras que la otra va a tener el gráfico mostrando la fase predominante.
+7) Una vez que se tienen filtradas las secuencias, posición de inicio de mapeo, hebra a la que mapearon y abundancia de reads,
+se procede a hacer el análisis de fase. Para esto se diseñó una plantilla de Excel que explico a continuación:
+	a) Tiene 3 pestañas: Hebra sentido, Hebra anti-sentido y P-Ratio. Las 2 primeras van a tener el análisis correspondiente
+	a cada hebra, mientras que la otra va a tener el gráfico mostrando la fase predominante.
 	Para las 2 primeras pestañas:
-	b) La columna A tiene las "posiciones relativas". El primer valor corresponde a la menor posición de inicio de mapeo encontrada para ese locus entre las dos hebras de todos los estadíos a analizar, por ejemplo: Si el estadío "A" presenta en la hebra sentido como posición de inicio "5" y para la hebra antisentido, "7", mientras que el estadío "B" presenta en la hebra sentido "6" y "4" en la antisentido, el primer valor debe ser "4" en todas las hebras de todos los estadíos. Los valores siguientes son los 20 sucesivos, es decir, debe haber 21 valores correspondientes a las 21 fases posibles. 
-	c) Las columnas B hasta H contienen la información obtenida en el paso anterios: B = Hebra a la que mapeó la read, C = Cromosoma, D = Posición de inicio, E = longitud de la read, F = Secuencia, G = Número de mismatches, H = Abundancia.
+	b) La columna A tiene las "posiciones relativas". El primer valor corresponde a la menor posición de inicio de mapeo
+	encontrada para ese locus entre las dos hebras de todos los estadíos a analizar, por ejemplo: Si el estadío "A" presenta
+	en la hebra sentido como posición de inicio "5" y para la hebra antisentido, "7", mientras que el estadío "B" presenta
+	en la hebra sentido "6" y "4" en la antisentido, el primer valor debe ser "4" en todas las hebras de todos los estadíos.
+	Los valores siguientes son los 20 sucesivos, es decir, debe haber 21 valores correspondientes a las 21 fases posibles. 
+	c) Las columnas B hasta H contienen la información obtenida en el paso anterios: B = Hebra a la que mapeó la read, C =
+	Cromosoma, D = Posición de inicio, E = longitud de la read, F = Secuencia, G = Número de mismatches, H = Abundancia.
 	d) Las siguientes 4 columnas son: "Diferencia de Fase", "div. 21", "Contador" y "Total". 
-	Diferencia de Fase: =D2-$A$2, diferencia entre la posición de inicio de mapeo y la posición mas baja de inicio de mapeo entre ambas hebras de todos los estadíos. 
+	Diferencia de Fase: =D2-$A$2, diferencia entre la posición de inicio de mapeo y la posición mas baja de inicio de mapeo
+	entre ambas hebras de todos los estadíos. 
 	div. 21: =I2/21, "Diferencia de Fase" divido 21. Si el resultado es un número entero, implica que se tiene un small RNA.
-	Contador: =LEN(J2)-LEN(SUBSTITUTE(J2,".","")) - Cuenta si encuentra un punto. Si es un número entero, el resultado es Cero y si es un número decimal, el resultado es Uno.
-	Total: Contabiliza la cantidad de Ceros en la columna anterior, por lo tanto, expresa la cantidad de small RNAs encontrados en esa fase.
-	Para cada fase también se contabiliza el P-ratio: abundancia de todas las especies de una fase/abundancia total. Para este cálculo, en la posición 12 de la columna "total" se realizó la suma de las abundancias en ambas hebras para la fase en cuestión. Cabe destacar que debido a la biogénesis de los Phasi-RNA, hay dos nucleótidos de diferencia entre la hebra sense y la antisense. Por lo tanto, el Bin 2 de la hebra sense se corresponde con el Bin 4 de la hebra antisense. Se empleó la siguiente fórmula: =SUMIF(K2:K214,"=0",$H$2:$H$214)+SUMIF($Phases_Sense.CI2:CI228,"=0",$Phases_Sense.$H$2:$H$228), donde se suma la abundancia de cada BIN según la hebra a todos los "ceros", es decir, a las especies en fase a ese Bin. Para conocer la abundancia total, simplemente se realiza una suma en la celda A28 de la hebra antisense: =SUM($Phases_Sense.A27+A26), donde A26 es =SUM(H2:H214) (es decir, la suma de las abundancias para la hebra antisense), y $Phases_Sense.A27 es =SUM(H2:H228) (suma de abundancias para la hebra sense)*********. En este caso, el P-Ratio fue expresado en la hebra antisense, con la fórmula =L12/$A$28. Este procedimiento de cálculo se repitió para cada uno de los 21 bins, teniendo en cuenta la diferencia de 2 entre ambas hebras.
-* Los valores dados a cada columna son ilustrativos de un sólo caso ejemplo, puede pasar que no necesariamente el rango de valores se encuentre entre H2 y H214 o H228, puede ser menor o mayor.
-	Finalmente, en la 3era pestaña se hizo una tabla de dos columnas: la primera es "Bin" y la segunda es "P-Ratio". Los valores de Bin van desde 1 hasta 21, y los P-Ratio son colocados usando el signo igual "=": esto permite que si se modifica la plantilla, también cambien estos valores. Obviamente, hay que hacer corresponder cada P-Ratio con su Bin para realizar el gráfico correctamente.
+	Contador: =LEN(J2)-LEN(SUBSTITUTE(J2,".","")) - Cuenta si encuentra un punto. Si es un número entero, el resultado es
+	Cero y si es un número decimal, el resultado es Uno.
+	Total: Contabiliza la cantidad de Ceros en la columna anterior, por lo tanto, expresa la cantidad de small RNAs
+	encontrados en esa fase.
+	Para cada fase también se contabiliza el P-ratio: abundancia de todas las especies de una fase/abundancia total. Para
+	este cálculo, en la posición 12 de la columna "total" se realizó la suma de las abundancias en ambas hebras para la fase
+	en cuestión. Cabe destacar que debido a la biogénesis de los Phasi-RNA, hay dos nucleótidos de diferencia entre la hebra
+	sense y la antisense. Por lo tanto, el Bin 2 de la hebra sense se corresponde con el Bin 4 de la hebra antisense. Se
+	empleó la siguiente fórmula: =SUMIF(K2:K214,"=0",$H$2:$H$214)+SUMIF($Phases_Sense.CI2:CI228,"=0",$Phases_Sense.$H$2:$H$228), donde se suma la abundancia de
+	cada BIN según la hebra a todos los "ceros", es decir, a las especies en fase a ese Bin. Para conocer la abundancia 
+	total, simplemente se realiza una suma en la celda A28 de la hebra antisense: =SUM($Phases_Sense.A27+A26), donde A26 es
+	=SUM(H2:H214) (es decir, la suma de las abundancias para la hebra antisense), y $Phases_Sense.A27 es =SUM(H2:H228) (suma
+	de abundancias para la hebra sense)*********. En este caso, el P-Ratio fue expresado en la hebra antisense, con la
+	fórmula =L12/$A$28. Este procedimiento de cálculo se repitió para cada uno de los 21 bins, teniendo en cuenta la
+	diferencia de 2 entre ambas hebras.
+* Los valores dados a cada columna son ilustrativos de un sólo caso ejemplo, puede pasar que no necesariamente el rango de
+valores se encuentre entre H2 y H214 o H228, puede ser menor o mayor.
+	Finalmente, en la 3era pestaña se hizo una tabla de dos columnas: la primera es "Bin" y la segunda es "P-Ratio". Los
+	valores de Bin van desde 1 hasta 21, y los P-Ratio son colocados usando el signo igual "=": esto permite que si se
+	modifica la plantilla, también cambien estos valores. Obviamente, hay que hacer corresponder cada P-Ratio con su Bin
+	para realizar el gráfico correctamente.
 
-8) Una vez analizados todos los loci con este procedimiento, se extraen las secuencias de small RNA correspondientes a la fase predominante (con mayor p-ratio) en cada locus. Posteriormente se podrá armar un archivo .FASTA que va a permitir la búsqueda de targets o de miRNA triggers para estos small RNA.
+8) Una vez analizados todos los loci con este procedimiento, se extraen las secuencias de small RNA correspondientes a la fase
+predominante (con mayor p-ratio) en cada locus. Posteriormente se podrá armar un archivo .FASTA que va a permitir la búsqueda de
+targets o de miRNA triggers para estos small RNA.
 
 
 
